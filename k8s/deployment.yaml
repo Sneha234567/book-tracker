@@ -21,5 +21,7 @@ spec:
             httpGet:
               path: /health
               port: 5000
-            initialDelaySeconds: 3
-            periodSeconds: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6

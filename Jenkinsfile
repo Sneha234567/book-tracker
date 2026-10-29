@@ -55,8 +55,7 @@ pipeline {
                     powershell -Command "(Get-Content k8s/deployment.yaml) -replace 'IMAGE_PLACEHOLDER', '%IMAGE%:%TAG%' | Set-Content k8s/deployment.yaml"
                     kubectl apply -f k8s/deployment.yaml
                     kubectl apply -f k8s/service.yaml
-                    kubectl rollout status deployment/book-tracker --timeout=90s
-                '''
+kubectl rollout status deployment/book-tracker --timeout=300s                '''
             }
         }
     }
