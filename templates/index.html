@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="rose" data-mode="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heartbound · Romance Reading Tracker</title>
+  <style>
+    :root[data-theme="rose"]     { --a1:#e11d48; --a2:#be185d; }
+    :root[data-theme="lavender"] { --a1:#7c3aed; --a2:#c026d3; }
+    :root[data-theme="sage"]     { --a1:#059669; --a2:#0d9488; }
+    :root[data-theme="coral"]    { --a1:#f97316; --a2:#e11d48; }
+    :root[data-mode="light"] {
+      --bg: color-mix(in srgb, var(--a1) 6%, #ffffff);
+      --card:#ffffff; --text:#2b2230; --muted:#7a6f80; --border:#efe5ec; --soft:#faf4f7;
+      --shadow: 0 6px 24px rgba(60,20,50,.08);
+    }
+    :root[data-mode="dark"] {
+      --bg:#15111a; --card:#211b27; --text:#f5eef7; --muted:#a99db0; --border:#352b3e; --soft:#2a2231;
+      --shadow: 0 6px 24px rgba(0,0,0,.45);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+           font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; line-height: 1.45; }
+    .serif { font-family: Georgia, "Palatino Linotype", "Book Antiqua", serif; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+    /* ---------- Hero ---------- */
+    .hero { position: relative; overflow: hidden; color: #fff; padding: 22px 0 34px;
+            background: linear-gradient(135deg, var(--a1), var(--a2)); }
+    .hero::before, .hero::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255,255,255,.08); }
+    .hero::before { width: 380px; height: 380px; right: -90px; top: -160px; }
+    .hero::after  { width: 240px; height: 240px; left: -70px; bottom: -130px; }
+    .hero .wrap { position: relative; z-index: 1; }
+    .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,.2);
+            display: grid; place-items: center; font-size: 1.4rem; }
+    .brand h1 { margin: 0; font-size: 1.7rem; letter-spacing: .3px; }
+    .brand p { margin: 0; font-size: .82rem; opacity: .85; }
+    .tools { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,.9); cursor: pointer; padding: 0; }
+    .dot.rose { background: linear-gradient(135deg,#e11d48,#be185d); }
+    .dot.lavender { background: linear-gradient(135deg,#7c3aed,#c026d3); }
+    .dot.sage { background: linear-gradient(135deg,#059669,#0d9488); }
+    .dot.coral { background: linear-gradient(135deg,#f97316,#e11d48); }
+    .mode { background: rgba(255,255,255,.22); color:#fff; border:0; border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: .85rem; }
+
+    .goal-row { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: center; margin-top: 26px; }
+    .ring { position: relative; width: 112px; height: 112px; }
+    .ring svg { transform: rotate(-90deg); }
+    .ring .num { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 1.25rem; line-height: 1.1; }
+    .ring .num small { display: block; font-weight: 400; font-size: .68rem; opacity: .85; }
+    .goal-text h2 { margin: 0 0 4px; font-size: 1.35rem; }
+    .goal-text p { margin: 0 0 10px; opacity: .92; }
+    .goal-text form { display: inline-flex; gap: 8px; align-items: center; font-size: .85rem; }
+    .goal-text input { width: 74px; padding: 6px 10px; border-radius: 8px; border: 0; }
+    .goal-text button { background: rgba(255,255,255,.25); color: #fff; border: 0; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+    .stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .stat { background: rgba(255,255,255,.16); backdrop-filter: blur(4px); border-radius: 14px; padding: 12px 14px; }
+    .stat b { display: block; font-size: 1.5rem; }
+    .stat span { font-size: .78rem; opacity: .9; }
+
+    /* ---------- Layout ---------- */
+    .layout { display: grid; grid-template-columns: 1fr 290px; gap: 22px; margin-top: -18px; padding-bottom: 50px; position: relative; z-index: 2; }
+    .panel { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); padding: 20px; }
+    .panel h3 { margin: 0 0 12px; font-size: 1.05rem; }
+    .stack { display: grid; gap: 18px; align-content: start; }
+    aside .panel { position: static; }
+
+    input, select, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--card); color: var(--text); font: inherit; font-size: .92rem; }
+    textarea { resize: vertical; min-height: 64px; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--a1); border-color: transparent; }
+    .btn { border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 600; cursor: pointer; color: #fff;
+           background: linear-gradient(135deg, var(--a1), var(--a2)); font-size: .92rem; }
+    .btn:hover { filter: brightness(1.07); }
+    .btn.small { padding: 6px 12px; font-size: .8rem; border-radius: 8px; }
+    .btn.soft { background: var(--soft); color: var(--text); border: 1px solid var(--border); }
+
+    .addgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+    .addgrid .c2 { grid-column: span 2; } .addgrid .c3 { grid-column: span 3; } .addgrid .c6 { grid-column: 1 / -1; }
+    label { font-size: .72rem; color: var(--muted); display: block; margin: 0 0 3px 2px; letter-spacing: .3px; text-transform: uppercase; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab { padding: 7px 14px; border-radius: 999px; text-decoration: none; color: var(--text); background: var(--soft);
+           border: 1px solid var(--border); font-size: .85rem; }
+    .tab b { opacity: .6; font-weight: 600; margin-left: 4px; }
+    .tab.on { background: linear-gradient(135deg, var(--a1), var(--a2)); color: #fff; border-color: transparent; }
+    .toolbar form { display: flex; gap: 8px; flex: 1; min-width: 260px; flex-wrap: wrap; }
+    .toolbar form input { flex: 2; min-width: 140px; }
+    .toolbar form select { flex: 1; min-width: 110px; width: auto; }
+
+    /* ---------- Book cards ---------- */
+    .books { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 16px; }
+    .book { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; }
+    .book-top { display: flex; gap: 14px; }
+    .cover { flex: 0 0 72px; height: 106px; border-radius: 4px 10px 10px 4px; color: #fff; display: flex; flex-direction: column;
+             align-items: center; justify-content: space-between; padding: 12px 6px 8px;
+             box-shadow: inset 7px 0 0 rgba(0,0,0,.16), 3px 6px 14px rgba(0,0,0,.25); }
+    .cover .ini { font-family: Georgia, serif; font-size: 2rem; line-height: 1; margin-top: 6px; text-shadow: 0 2px 6px rgba(0,0,0,.3); }
+    .cover .orn { font-size: .85rem; opacity: .85; }
+    .g-contemporary { background: linear-gradient(160deg,#fb7185,#be123c); }
+    .g-historical { background: linear-gradient(160deg,#b45309,#78350f); }
+    .g-fantasy { background: linear-gradient(160deg,#8b5cf6,#3730a3); }
+    .g-rom-com { background: linear-gradient(160deg,#fbbf24,#f97316); }
+    .g-paranormal { background: linear-gradient(160deg,#475569,#7c3aed); }
+    .g-romantic-suspense { background: linear-gradient(160deg,#1f2937,#be123c); }
+    .g-young-adult { background: linear-gradient(160deg,#34d399,#0ea5e9); }
+    .g-other { background: linear-gradient(160deg,#94a3b8,#475569); }
+    .info { flex: 1; min-width: 0; }
+    .info h4 { margin: 0; font-size: 1.05rem; font-family: Georgia, serif; word-break: break-word; }
+    .info .by { color: var(--muted); font-size: .85rem; margin: 2px 0 8px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { font-size: .7rem; padding: 3px 10px; border-radius: 999px; background: var(--soft); border: 1px solid var(--border); color: var(--text); }
+    .pill { font-size: .7rem; padding: 3px 10px; border-radius: 999px; color: #fff; font-weight: 600; }
+    .pill.want { background: #f59e0b; } .pill.reading { background: #3b82f6; } .pill.finished { background: #10b981; }
+    .hearts { display: flex; gap: 2px; margin: 8px 0 0; }
+    .hearts form { margin: 0; }
+    .h { background: none; border: 0; padding: 0 1px; font-size: 1.25rem; cursor: pointer; color: var(--border); line-height: 1; }
+    .h.on { color: var(--a1); }
+    .h:hover { transform: scale(1.15); }
+    .review { margin: 0; padding: 8px 12px; border-left: 3px solid var(--a1); background: var(--soft); border-radius: 0 10px 10px 0;
+              font-family: Georgia, serif; font-style: italic; font-size: .88rem; color: var(--text); word-break: break-word; }
+    .meta { color: var(--muted); font-size: .76rem; }
+    .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: auto; }
+    .actions form { margin: 0; }
+    .icon { background: transparent; border: 0; cursor: pointer; font-size: 1.05rem; opacity: .65; margin-left: auto; }
+    .icon:hover { opacity: 1; }
+    details summary { cursor: pointer; font-size: .8rem; color: var(--muted); list-style: none; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--soft); }
+    details[open] summary { color: var(--a1); }
+    details .form { display: grid; gap: 8px; margin-top: 10px; }
+    details .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .empty { grid-column: 1 / -1; text-align: center; padding: 46px 10px; color: var(--muted); }
+    .empty .big { font-size: 2.4rem; color: var(--a1); }
+
+    /* ---------- Sidebar ---------- */
+    .gbar { margin-bottom: 10px; font-size: .84rem; }
+    .gbar .lab { display: flex; justify-content: space-between; margin-bottom: 3px; }
+    .gbar .track { height: 8px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+    .gbar .fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--a1), var(--a2)); }
+    .top { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: .86rem; }
+    .top:last-child { border-bottom: 0; }
+    .top .t { flex: 1; min-width: 0; } .top .t b { display: block; font-family: Georgia, serif; }
+    .top .r { color: var(--a1); white-space: nowrap; }
+    .muted { color: var(--muted); font-size: .85rem; }
+    footer { text-align: center; color: var(--muted); font-size: .78rem; padding: 0 0 30px; }
+
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+      .books { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .goal-row { grid-template-columns: 1fr; justify-items: start; }
+      .addgrid { grid-template-columns: 1fr 1fr; }
+      .addgrid .c2, .addgrid .c3 { grid-column: span 2; }
+    }
+  </style>
+  <script>
+    try {
+      var r = document.documentElement;
+      r.dataset.theme = localStorage.getItem("hb-theme") || "rose";
+      r.dataset.mode = localStorage.getItem("hb-mode") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    } catch (e) {}
+    function setTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem("hb-theme", t); } catch (e) {} }
+    function toggleMode() {
+      var r = document.documentElement, m = r.dataset.mode === "dark" ? "light" : "dark";
+      r.dataset.mode = m; try { localStorage.setItem("hb-mode", m); } catch (e) {}
+    }
+  </script>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="bar">
+        <div class="brand">
+          <div class="logo">♥</div>
+          <div><h1 class="serif">Heartbound</h1><p>Romance reading tracker</p></div>
+        </div>
+        <div class="tools">
+          <button class="dot rose" onclick="setTheme('rose')" title="Rose"></button>
+          <button class="dot lavender" onclick="setTheme('lavender')" title="Lavender"></button>
+          <button class="dot sage" onclick="setTheme('sage')" title="Sage"></button>
+          <button class="dot coral" onclick="setTheme('coral')" title="Coral"></button>
+          <button class="mode" onclick="toggleMode()">🌗 Light / Dark</button>
+        </div>
+      </div>
+
+      <div class="goal-row">
+        <div class="ring">
+          <svg width="112" height="112" viewBox="0 0 112 112">
+            <circle cx="56" cy="56" r="44" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="10"/>
+            <circle cx="56" cy="56" r="44" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"
+                    stroke-dasharray="{{ ring_length }}" stroke-dashoffset="{{ ring_offset }}"/>
+          </svg>
+          <div class="num"><div>{{ pct }}%<small>{{ finished_year }} of {{ goal }}</small></div></div>
+        </div>
+        <div class="goal-text">
+          <h2 class="serif">{{ year }} reading goal</h2>
+          <p>
+            {% if finished_year >= goal %}Goal reached. What a reader! 🎉
+            {% else %}{{ goal - finished_year }} more {{ 'book' if goal - finished_year == 1 else 'books' }} to reach your goal of {{ goal }}.{% endif %}
+          </p>
+          <form action="/goal" method="post">
+            <label for="goal" style="margin:0;color:#fff;">Yearly goal</label>
+            <input id="goal" type="number" name="goal" min="1" max="365" value="{{ goal }}">
+            <button type="submit">Update</button>
+          </form>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>{{ counts.get('want', 0) }}</b><span>Want to read</span></div>
+          <div class="stat"><b>{{ counts.get('reading', 0) }}</b><span>Currently reading</span></div>
+          <div class="stat"><b>{{ counts.get('finished', 0) }}</b><span>Finished</span></div>
+          <div class="stat"><b>{{ avg if avg else '–' }}{{ ' ♥' if avg }}</b><span>Average rating</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap layout">
+    <div class="stack">
+      <section class="panel">
+        <h3 class="serif">Add a book</h3>
+        <form action="/add" method="post" class="addgrid">
+          <div class="c3"><label>Title</label><input type="text" name="title" placeholder="Book title" maxlength="200" required></div>
+          <div class="c3"><label>Author</label><input type="text" name="author" placeholder="Author name" maxlength="120"></div>
+          <div class="c2"><label>Genre</label>
+            <select name="genre">{% for g in genres %}<option value="{{ g }}">{{ g }}</option>{% endfor %}</select></div>
+          <div class="c2"><label>Status</label>
+            <select name="status">{% for k, v in statuses.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></div>
+          <div class="c2"><label>Pages (optional)</label><input type="number" name="pages" min="1" max="5000" placeholder="e.g. 320"></div>
+          <div class="c6"><button class="btn" type="submit">＋ Add to my shelf</button></div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <div class="tabs">
+            <a class="tab {{ 'on' if status == 'all' }}" href="/?status=all&genre={{ genre }}&q={{ q }}&sort={{ sort }}">All<b>{{ total }}</b></a>
+            {% for k, v in statuses.items() %}
+            <a class="tab {{ 'on' if status == k }}" href="/?status={{ k }}&genre={{ genre }}&q={{ q }}&sort={{ sort }}">{{ v }}<b>{{ counts.get(k, 0) }}</b></a>
+            {% endfor %}
+          </div>
+          <form method="get" action="/">
+            <input type="hidden" name="status" value="{{ status }}">
+            <input type="search" name="q" value="{{ q }}" placeholder="🔍 Search title or author">
+            <select name="genre" onchange="this.form.submit()">
+              <option value="">All genres</option>
+              {% for g in genres %}<option value="{{ g }}" {{ 'selected' if g == genre }}>{{ g }}</option>{% endfor %}
+            </select>
+            <select name="sort" onchange="this.form.submit()">
+              <option value="newest" {{ 'selected' if sort == 'newest' }}>Newest first</option>
+              <option value="title" {{ 'selected' if sort == 'title' }}>Title A–Z</option>
+              <option value="author" {{ 'selected' if sort == 'author' }}>Author A–Z</option>
+              <option value="rating" {{ 'selected' if sort == 'rating' }}>Highest rated</option>
+            </select>
+          </form>
+        </div>
+
+        <div class="books">
+          {% for b in books %}
+          <article class="book">
+            <div class="book-top">
+              <div class="cover g-{{ b.genre|lower|replace(' ', '-') }}">
+                <div class="ini">{{ b.title[0]|upper }}</div><div class="orn">♥</div>
+              </div>
+              <div class="info">
+                <h4>{{ b.title }}</h4>
+                <div class="by">by {{ b.author }}</div>
+                <div class="chips">
+                  <span class="pill {{ b.status }}">{{ statuses[b.status] }}</span>
+                  <span class="chip">{{ b.genre }}</span>
+                  {% if b.pages %}<span class="chip">{{ b.pages }} pages</span>{% endif %}
+                </div>
+                {% if b.status == 'finished' %}
+                <form class="hearts" action="/rate/{{ b.id }}" method="post" title="Click a heart to rate">
+                  {% for n in range(1, 6) %}<button class="h {{ 'on' if n <= b.rating }}" name="rating" value="{{ n }}" type="submit">♥</button>{% endfor %}
+                </form>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if b.review %}<p class="review">“{{ b.review }}”</p>{% endif %}
+            {% if b.finished_on %}<div class="meta">Finished on {{ b.finished_on|pretty_date }}</div>
+            {% else %}<div class="meta">Added on {{ b.added_on|pretty_date }}</div>{% endif %}
+
+            <div class="actions">
+              {% if b.status == 'want' %}
+              <form action="/status/{{ b.id }}" method="post"><input type="hidden" name="status" value="reading"><button class="btn small">▶ Start reading</button></form>
+              {% elif b.status == 'reading' %}
+              <form action="/status/{{ b.id }}" method="post"><input type="hidden" name="status" value="finished"><button class="btn small">✓ Mark finished</button></form>
+              {% else %}
+              <form action="/status/{{ b.id }}" method="post"><input type="hidden" name="status" value="reading"><button class="btn small soft">↺ Read again</button></form>
+              {% endif %}
+              <details>
+                <summary>✏️ Edit &amp; review</summary>
+                <form class="form" action="/edit/{{ b.id }}" method="post">
+                  <input type="text" name="title" value="{{ b.title }}" maxlength="200" required>
+                  <input type="text" name="author" value="{{ b.author }}" maxlength="120">
+                  <div class="row2">
+                    <select name="genre">{% for g in genres %}<option value="{{ g }}" {{ 'selected' if g == b.genre }}>{{ g }}</option>{% endfor %}</select>
+                    <select name="status">{% for k, v in statuses.items() %}<option value="{{ k }}" {{ 'selected' if k == b.status }}>{{ v }}</option>{% endfor %}</select>
+                  </div>
+                  <div class="row2">
+                    <input type="number" name="pages" min="1" max="5000" value="{{ b.pages or '' }}" placeholder="Pages">
+                    <select name="rating">
+                      <option value="0">No rating</option>
+                      {% for n in range(1, 6) %}<option value="{{ n }}" {{ 'selected' if n == b.rating }}>{{ '♥' * n }}</option>{% endfor %}
+                    </select>
+                  </div>
+                  <textarea name="review" maxlength="1000" placeholder="Your short review...">{{ b.review }}</textarea>
+                  <button class="btn small" type="submit">Save changes</button>
+                </form>
+              </details>
+              <form action="/delete/{{ b.id }}" method="post" style="margin-left:auto"><button class="icon" title="Remove from shelf">🗑️</button></form>
+            </div>
+          </article>
+          {% else %}
+          <div class="empty">
+            <div class="big">♥</div>
+            <p class="serif" style="font-size:1.1rem;margin:6px 0">{{ 'Your shelf is empty' if total == 0 else 'No books match your filters' }}</p>
+            <p class="muted">{{ 'Add your first romance above to get started.' if total == 0 else 'Try a different tab, genre or search.' }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <aside class="stack">
+      <section class="panel">
+        <h3 class="serif">Library by genre</h3>
+        {% for g in genre_bars %}
+        <div class="gbar">
+          <div class="lab"><span>{{ g.genre }}</span><b>{{ g.n }}</b></div>
+          <div class="track"><div class="fill" style="width: {{ g.pct }}%"></div></div>
+        </div>
+        {% else %}<p class="muted">Your genres will appear here.</p>{% endfor %}
+      </section>
+      <section class="panel">
+        <h3 class="serif">Top rated</h3>
+        {% for t in top_rated %}
+        <div class="top"><div class="t"><b>{{ t.title }}</b><span class="muted">{{ t.author }}</span></div><div class="r">{{ '♥' * t.rating }}</div></div>
+        {% else %}<p class="muted">Rate a finished book to see your favourites here.</p>{% endfor %}
+      </section>
+    </aside>
+  </div>
+  <footer>Heartbound · Built with Flask, Docker, Jenkins &amp; Kubernetes</footer>
+</body>
+</html>

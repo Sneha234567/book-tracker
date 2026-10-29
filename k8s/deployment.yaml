@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-tracker
+  template:
+    metadata:
+      labels:
+        app: book-tracker
+    spec:
+      containers:
+        - name: book-tracker
+          image: IMAGE_PLACEHOLDER
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 3
+            periodSeconds: 5
